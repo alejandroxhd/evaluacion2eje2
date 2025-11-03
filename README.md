@@ -1,5 +1,5 @@
 
-# Proyecto EVA2 Actividad 2 — Integración Continua con BDD y Performance
+# ACTIVIDAD 2
 
 ## Objetivo
 Implementar un flujo de Integración Continua (CI) con pruebas automatizadas (unitarias, BDD y de rendimiento) aplicadas a una funcionalidad simple de login de usuario.
@@ -86,7 +86,6 @@ Archivo: `.github/workflows/ci.yml`
 |-----------------|------------|--------------|
 | BDD (Cucumber) | target/cucumber-report.html | Resultados de escenarios y pasos. |
 | Cobertura (JaCoCo) | target/site/jacoco/index.html | Porcentaje de líneas cubiertas. |
-| Performance (JMeter) | target/jmeter/reports/.../index.html | Métricas de throughput, latencia y errores. |
 
 ---
 
@@ -119,23 +118,3 @@ En el archivo `ci.yml` se agregaron pasos para publicar las métricas en el Job 
     echo "- Cobertura: target/site/jacoco/index.html" >> $GITHUB_STEP_SUMMARY
 ```
 
----
-
-## Capturas sugeridas
-1. Ejecución de los escenarios BDD (consola o reporte HTML).  
-2. Reporte HTML de Cucumber (target/cucumber-report.html).  
-3. Reporte de cobertura JaCoCo (target/site/jacoco/index.html).  
-4. Reporte de performance JMeter (target/jmeter/reports/.../index.html).  
-5. Dashboard de Actions con los artefactos subidos.
-
----
-
-## Conclusión
-El proyecto eva2actividad2 demuestra un flujo completo de Integración Continua con:
-- Automatización de pruebas funcionales (BDD).
-- Métricas de cobertura (JaCoCo).
-- Pruebas de rendimiento (JMeter).
-- Reportes navegables.
-- Publicación automática en el pipeline CI/CD.
-
-Esto garantiza trazabilidad, visibilidad de calidad y control de rendimiento en cada build.
