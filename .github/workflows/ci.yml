@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-bdd-perf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - name: Build & Unit/BDD Tests
+        run: mvn -B -DskipTests=false test
+
+      - name: Generate Reports (JaCoCo, Cucumber HTML, JMeter)
+        run: mvn -B verify
+
+      - name: Install jq (for metrics)
+        if: always()
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Publicar métricas en Job Summary
+        if: always()
+        run: |
+          echo "## Resumen de métricas" >> $GITHUB_STEP_SUMMARY
+          if [ -f target/cucumber.json ]; then
+            PASSED=$(jq '[.[] | .elements[] | .steps[] | select(.result.status=="passed")] | length' target/cucumber.json)
+            FAILED=$(jq '[.[] | .elements[] | .steps[] | select(.result.status=="failed")] | length' target/cucumber.json)
+            echo "### Cucumber" >> $GITHUB_STEP_SUMMARY
+            echo "- Pasos OK: ${PASSED}" >> $GITHUB_STEP_SUMMARY
+            echo "- Pasos FAIL: ${FAILED}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "_No se encontró target/cucumber.json_" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "### Artefactos" >> $GITHUB_STEP_SUMMARY
+          echo "- Cucumber HTML: \`target/cucumber-html-reports/overview-features.html\`" >> $GITHUB_STEP_SUMMARY
+          echo "- JaCoCo: \`target/site/jacoco/index.html\`" >> $GITHUB_STEP_SUMMARY
+          echo "- JMeter: \`target/jmeter/reports/*/index.html\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Cucumber HTML (built-in)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: target/cucumber-html-reports/
+
+      - name: Upload JaCoCo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+      - name: Upload JMeter Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-report
+          path: target/jmeter/reports/
